@@ -8,7 +8,12 @@ def parse_args():
     parser.add_argument('--log_dir', type=str, default='./logs', help='Directory to save logs and models')
     parser.add_argument('--epochs', type=int, default=100, help='Number of training epochs')
     parser.add_argument('--model_name', type=str, default='model', help='Name of the model')
-
+    parser.add_argument('--dataset', type=str, default='All_Beauty', help='Dataset name')
+    
+    parser.add_argument('--min_seq_length', type=int, default=2, help='Minimum length of a user behavior\'s sequence')
+    parser.add_argument('--max_seq_length', type=int, default=50, help='Maximum length of a user behavior\'s sequence')
+    
+    
     # model
     parser.add_argument('--batch_size', type=int, default=32, help='Batch size for training')
     return parser.parse_args()

@@ -1,13 +1,30 @@
 from torch.utils.data import DataLoader
+from lib.dataset import load_dataset
 
-class SRDataloader:
-    def __init__(self, args, dataset):
-        super(SRDataloader, self).__init__()
-        self.args = args
-        self.dataset = dataset
-        
-    def get_data_loaders(self):
-        train_loader = DataLoader(self.dataset['train'], batch_size=self.args.batch_size, shuffle=True)
-        val_loader = DataLoader(self.dataset['val'], batch_size=self.args.batch_size, shuffle=False) if dataset.get('val') is not None else None
-        test_loader = DataLoader(self.dataset['test'], batch_size=self.args.batch_size, shuffle=False) if dataset.get('test') is not None else None
-        return train_loader, val_loader, test_loader
+def get_data_loaders(args):
+    data = load_dataset(args)
+    train_data = dict()
+    val_data = dict()
+    test_data = dict()
+
+    for uidx in data.keys():
+        if len (data[uidx]) < 3:
+            train_data[uidx] = data[uidx]
+            val_data[uidx] = []
+            test_data[uidx] = []
+        else:
+            train_data[uidx] = data[uidx][:-2]
+            val_data[uidx] = [data[uidx][-2]]
+            test_data[uidx] = [data[uidx][-1]]
+
+    
+    train_loader = DataLoader(train_data, batch_size=args.batch_size, shuffle=True)
+    val_loader = DataLoader(val_data, batch_size=args.batch_size, shuffle=False) if val_data is not None else test_data
+    test_loader = DataLoader(test_data, batch_size=args.batch_size, shuffle=False) if test_data is not None else None
+    
+    return train_loader, val_loader, test_loader
+
+
+
+
+
