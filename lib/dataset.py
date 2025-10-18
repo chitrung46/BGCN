@@ -1,13 +1,54 @@
 import pandas as pd
+from torch.utils.data import Dataset
+
+class SRDataset(Dataset):
+    def __init__(self, data, train_seq_len=None):
+        super(SRDataset).__init__()
+        self.train_seq_len = train_seq_len
+        self.data = data
+
+    def __length__
+
 
 def load_dataset(args):
+    if args.dataset == 'All_Beauty': 
+        seqs, masks, max_len = process_All_Beauty(args)
+
+def normalize_seq(seqs, min_seq_len=1, max_seq_len=None):
+    seq_len = [len(seq) for seq in seqs]
+    if max_len is not None:
+        max_len = max(seq_len)
+    else:
+        max_len = max_seq_len
+    
+    print(f"\nNumber of users before filtering: {len(seqs)}")
+
+    filtered_seqs = dict()
+    masks = dict()
+    padding = [(0, '', pd.Timestamp(0))]
+
+    for uidx, seq in seqs.items():
+        if len(seq) >= min_seq_len:
+            l = len(seq)
+            filtered_seqs[uidx] = [padding*(max_len-l) + seq[-max_len:] if (max_len > l) 
+                                    else seq[-max_len:]]
+            masks[uidx] = [[0]*(max_len-l) + [1]*max_len if (max_len > l) 
+                                    else [1]*max_len]
+
+    print(f"\nNumber of users after filtering: {len(filtered_seqs)}")
+    return filtered_seqs, masks, max_len
+ 
+        
+    
+
+def process_All_Beauty(args):
     if args.dataset == 'All_Beauty':
         df = pd.read_json('./data/All_Beauty.jsonl.gz', compression='gzip', lines=True)
         df.drop(columns=['title', 'images', 'asin'], inplace=True)
         df.rename(columns={'parent_asin': 'item_id'}, inplace=True)
         df = df[df['verified_purchase'] == True]
 
-    Seq = dict()
+    seqs = dict()
     user_map = dict()
     item_map = dict()
     user_num = 0
@@ -31,33 +72,16 @@ def load_dataset(args):
         uidx = user_map[user_id]
         iidx = item_map[item_id]
 
-        if uidx in Seq.keys():
-            Seq[uidx].append([iidx, rating, review, timestamp])
+        if uidx in seqs.keys():
+            seqs[uidx].append([iidx, rating, review, timestamp])
         else:
-            Seq[uidx] = [[iidx, rating, review, timestamp]]
+            seqs[uidx] = [[iidx, rating, review, timestamp]]
 
-    for seq in Seq.values():
-        seq.sort(key=lambda x: x[3])        
+    for seq in seqs.values():
+        seq.sort(key=lambda x: x[3])     
 
-    print(f"\nNumber of users before filtering: {len(Seq)}")
+    filtered_seqs, masks, max_len = normalize_seq(seqs, args.min_seq_len, args.max_seq_len)   
 
-    min_seq_len = args.min_seq_len
-    max_seq_len = args.max_seq_len
-
-    filtered_Seq = {}
-    for user_id, seq in Seq.items():
-        if len(seq) >= min_seq_len:
-            # Take the last max_seq_len items
-            processed_seq = seq[-max_seq_len:]
-
-            if len(processed_seq) < max_seq_len:
-                padding_len = max_seq_len - len(processed_seq)
-                padding = [(0, '', pd.Timestamp(0))] * padding_len
-                processed_seq = padding + processed_seq
-
-            filtered_Seq[user_id] = processed_seq
-
-    print(f"\nNumber of users after filtering: {len(filtered_Seq)}")
-    return filtered_Seq
+    return filtered_seqs, masks, max_len
 
             
