@@ -41,18 +41,18 @@ def load_dataset(args):
 
     print(f"\nNumber of users before filtering: {len(Seq)}")
 
-    min_seq_length = args.min_seq_length
-    max_seq_length = args.max_seq_length
+    min_seq_len = args.min_seq_len
+    max_seq_len = args.max_seq_len
 
     filtered_Seq = {}
     for user_id, seq in Seq.items():
-        if len(seq) >= min_seq_length:
-            # Take the last max_seq_length items
-            processed_seq = seq[-max_seq_length:]
+        if len(seq) >= min_seq_len:
+            # Take the last max_seq_len items
+            processed_seq = seq[-max_seq_len:]
 
-            if len(processed_seq) < max_seq_length:
-                padding_length = max_seq_length - len(processed_seq)
-                padding = [(0, '', pd.Timestamp(0))] * padding_length
+            if len(processed_seq) < max_seq_len:
+                padding_len = max_seq_len - len(processed_seq)
+                padding = [(0, '', pd.Timestamp(0))] * padding_len
                 processed_seq = padding + processed_seq
 
             filtered_Seq[user_id] = processed_seq
