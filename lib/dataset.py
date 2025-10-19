@@ -20,16 +20,13 @@ class SRDataset(Dataset):
         label = [seq[-1]][0]
         return torch.LongTensor(data), torch.LongTensor(label), torch.LongTensor(mask)
 
-def normalize_seq(seqs, min_seq_len=1, max_seq_len=None):
-    seq_len = [len(seq) for seq in seqs]
-    if max_len is not None:
+def normalize_seq(seqs, min_seq_len=0, max_seq_len=None):
+    seq_len = [len(seq) for seq in seqs.values()]
+    if max_seq_len is not None:
         max_len = max(seq_len)
     else:
-        max_len = max_seq_len
+        max_len = max_seq_len 
     
-    print(f"Average length of sequence: {sum(seq_len)/len(seq_len)}")
-    print(f"Number of users before filtering: {len(seqs)}")
-
     filtered_seqs = dict()
     masks = dict()
     padding = [(0, '', pd.Timestamp(0))]
@@ -42,7 +39,12 @@ def normalize_seq(seqs, min_seq_len=1, max_seq_len=None):
             masks[uidx] = [[0]*(max_len-l) + [1]*max_len if (max_len > l) 
                                     else [1]*max_len]
 
+    
+    print(f"Average length of sequence: {sum(seq_len)/len(seq_len)}")
+    print(f"Maximum length of sequence: {max_len}")
+    print(f"Number of users before filtering: {len(seqs)}")
     print(f"Number of users after filtering: {len(filtered_seqs)}")
+
     return filtered_seqs, masks, max_len
 
 def process_All_Beauty(args):
@@ -80,8 +82,7 @@ def process_All_Beauty(args):
             seqs[uidx].append([iidx, rating, review, timestamp])
         else:
             seqs[uidx] = [[iidx, rating, review, timestamp]]
-
-    print(f"Number of user: {len(user_map)}")
+    
     print(f"Number of item: {len(item_map)}")
 
     for seq in seqs.values():

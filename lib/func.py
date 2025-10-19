@@ -10,7 +10,7 @@ def parse_args():
     parser.add_argument('--model_name', type=str, default='model', help='Name of the model')
     parser.add_argument('--dataset', type=str, default='All_Beauty', help='Dataset name')
     
-    parser.add_argument('--min_seq_len', type=int, default=2, help='Minimum length of a user behavior\'s sequence')
+    parser.add_argument('--min_seq_len', type=int, default=1, help='Minimum length of a user behavior\'s sequence')
     parser.add_argument('--max_seq_len', type=int, default=50, help='Maximum length of a user behavior\'s sequence')
     
     
