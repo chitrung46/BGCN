@@ -1,18 +1,24 @@
+import torch
 import pandas as pd
 from torch.utils.data import Dataset
 
 class SRDataset(Dataset):
-    def __init__(self, data, train_seq_len=None):
+    def __init__(self, seqs, masks):
         super(SRDataset).__init__()
-        self.train_seq_len = train_seq_len
-        self.data = data
+        self.seqs = seqs
+        self.masks = masks
 
-    def __length__
+    def __len__(self):
+        return len(self.seqs)
 
-
-def load_dataset(args):
-    if args.dataset == 'All_Beauty': 
-        seqs, masks, max_len = process_All_Beauty(args)
+    def __getitem__(self, index):
+        seq = self.seqs[index]
+        mask = self.masks[index]
+        data = seq[:-1][0]
+        rating = seq[:-1][1]
+        review = seq[:-1][2]
+        label = [seq[-1]][0]
+        return torch.LongTensor(data), torch.LongTensor(label), torch.LongTensor(mask)
 
 def normalize_seq(seqs, min_seq_len=1, max_seq_len=None):
     seq_len = [len(seq) for seq in seqs]
@@ -21,7 +27,8 @@ def normalize_seq(seqs, min_seq_len=1, max_seq_len=None):
     else:
         max_len = max_seq_len
     
-    print(f"\nNumber of users before filtering: {len(seqs)}")
+    print(f"Average length of sequence: {sum(seq_len)/len(seq_len)}")
+    print(f"Number of users before filtering: {len(seqs)}")
 
     filtered_seqs = dict()
     masks = dict()
@@ -35,11 +42,8 @@ def normalize_seq(seqs, min_seq_len=1, max_seq_len=None):
             masks[uidx] = [[0]*(max_len-l) + [1]*max_len if (max_len > l) 
                                     else [1]*max_len]
 
-    print(f"\nNumber of users after filtering: {len(filtered_seqs)}")
+    print(f"Number of users after filtering: {len(filtered_seqs)}")
     return filtered_seqs, masks, max_len
- 
-        
-    
 
 def process_All_Beauty(args):
     if args.dataset == 'All_Beauty':
@@ -77,6 +81,9 @@ def process_All_Beauty(args):
         else:
             seqs[uidx] = [[iidx, rating, review, timestamp]]
 
+    print(f"Number of user: {len(user_map)}")
+    print(f"Number of item: {len(item_map)}")
+
     for seq in seqs.values():
         seq.sort(key=lambda x: x[3])     
 
@@ -84,4 +91,8 @@ def process_All_Beauty(args):
 
     return filtered_seqs, masks, max_len
 
+def load_dataset(args):
+    if args.dataset == 'All_Beauty': 
+        seqs, masks, max_len = process_All_Beauty(args)
+    return seqs, masks
             
