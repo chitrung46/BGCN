@@ -37,11 +37,11 @@ class BasicTrainer:
 
         for batch_idx, batch in enumerate(self.train_loader):
             batch_size = batch[0].size(0)
-            batch = [x.to(self.device) for x in batch]
+            input = [x.to(self.device) for x in batch]
             
             self.optimizer.zero_grad()
 
-            seqs, labels = batch
+            seqs, labels, mask = batch
             logits = self.model(seqs)  # B x T x V
             logits = logits.view(-1, logits.size(-1))  # (B*T) x V
             labels = labels.view(-1)  # B*T
@@ -95,8 +95,7 @@ class BasicTrainer:
                 for key in metrics[0].keys():   
                     avg_metrics[key] = sum([m[key] for m in metrics]) / len(metrics)
 
-            self.logger.info('Testing finished.')
-            self.logger.info('Average Test Metrics: {}\n Validation time: {:.2f} s'.format(avg_metrics, val_time))
+            self.logger.info('Average Validation Metrics: {}\n Validation time: {:.2f} s'.format(avg_metrics, val_time))
             
     def save_checkpoint(self):
         state = {

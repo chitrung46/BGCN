@@ -6,7 +6,6 @@ args = parse_args()
 
 train_loader, val_loader, test_loader = get_data_loaders(args)
 model = None
-print(f"Num of train_loader, val_loader, test_loader: {len(train_loader)}, {len(val_loader)}, {len(test_loader)}")
 
 # trainer = BasicTrainer(args, 
 #                        optimizer, 
@@ -18,10 +17,10 @@ print(f"Num of train_loader, val_loader, test_loader: {len(train_loader)}, {len(
 #                        test_loader, 
 #                        device)
 
-# if args.phase == 'train':
+# if args.mode == 'train':
 #     trainer.train()
-# elif args.phase == 'test':
+# elif args.mode == 'test':
 #     trainer.test()
 # else:
-#     raise ValueError("Invalid phase. Choose 'train' or 'test'.")
+#     raise ValueError("Invalid mode. Choose 'train' or 'test'.")
 

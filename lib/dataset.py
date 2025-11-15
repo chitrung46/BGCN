@@ -18,7 +18,7 @@ class SRDataset(Dataset):
         rating = seq[:-1][1]
         review = seq[:-1][2]
         label = [seq[-1]][0]
-        return torch.LongTensor(data), torch.LongTensor(label), torch.LongTensor(mask)
+        return torch.LongTensor(data), torch.LongTensor(review), torch.LongTensor(label), torch.LongTensor(mask)
 
 def normalize_seq(seqs, min_seq_len=0, max_seq_len=None):
     seq_len = [len(seq) for seq in seqs.values()]
@@ -47,12 +47,11 @@ def normalize_seq(seqs, min_seq_len=0, max_seq_len=None):
 
     return filtered_seqs, masks, max_len
 
-def process_All_Beauty(args):
-    if args.dataset == 'All_Beauty':
-        df = pd.read_json('./data/All_Beauty.jsonl.gz', compression='gzip', lines=True)
-        df.drop(columns=['title', 'images', 'asin'], inplace=True)
-        df.rename(columns={'parent_asin': 'item_id'}, inplace=True)
-        df = df[df['verified_purchase'] == True]
+def process_AmazonDataset(args):
+    df = pd.read_json(f'./data/{args.dataset}.jsonl.gz', compression='gzip', lines=True)
+    df.drop(columns=['title', 'images', 'asin'], inplace=True)
+    df.rename(columns={'parent_asin': 'item_id'}, inplace=True)
+    df = df[df['verified_purchase'] == True]
 
     seqs = dict()
     user_map = dict()
@@ -94,6 +93,6 @@ def process_All_Beauty(args):
 
 def load_dataset(args):
     if args.dataset == 'All_Beauty': 
-        seqs, masks, max_len = process_All_Beauty(args)
+        seqs, masks, max_len = process_AmazonDataset(args)
     return seqs, masks
             
