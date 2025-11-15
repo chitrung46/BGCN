@@ -22,7 +22,8 @@ def parse_args():
     # data
     args.add_argument('--min_seq_len', type=int, default=config['data']['min_seq_len'], help='Minimum length of a user behavior\'s sequence')
     args.add_argument('--max_seq_len', type=int, default=config['data']['max_seq_len'], help='Maximum length of a user behavior\'s sequence')
-
+    args.add_argument('--k_transition', type=int, default=config['data']['k_transition'], help='Number of transitions for constructing global graph')
+    
     # model
     args.add_argument('--batch_size', type=int, default=config['model']['batch_size'], help='Batch size for training')
     args.add_argument('--hidden_dim', type=int, default=config['model']['hidden_dim'], help='Hidden dim of model layers')
