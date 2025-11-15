@@ -37,12 +37,13 @@ class BasicTrainer:
 
         for batch_idx, batch in enumerate(self.train_loader):
             batch_size = batch[0].size(0)
-            input = [x.to(self.device) for x in batch]
+            batch = [x.to(self.device) for x in batch]
             
             self.optimizer.zero_grad()
 
             seqs, labels, mask = batch
             logits = self.model(seqs)  # B x T x V
+            print("Finish period 1")
             logits = logits.view(-1, logits.size(-1))  # (B*T) x V
             labels = labels.view(-1)  # B*T
             loss = self.loss(logits, labels)
