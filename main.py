@@ -5,8 +5,8 @@ from model.BGCN import BGCN
 
 args = parse_args()
 
-train_loader, val_loader, test_loader = get_data_loaders(args)
-model = BGCN(args)
+train_loader, val_loader, test_loader, global_graph, item_num = get_data_loaders(args)
+model = BGCN(args, global_graph, item_num)
 
 trainer = BasicTrainer(args, 
                        optimizer=None, 

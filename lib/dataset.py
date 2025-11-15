@@ -1,6 +1,7 @@
 import torch
 import pandas as pd
 from torch.utils.data import Dataset
+from lib.func import construct_global_graph
 
 class SRDataset(Dataset):
     def __init__(self, seqs, masks):
@@ -82,17 +83,17 @@ def process_AmazonDataset(args):
         else:
             seqs[uidx] = [[iidx, rating, review, timestamp]]
     
-    print(f"Number of item: {len(item_map)}")
+    print(f"Number of item: {item_num}")
 
     for seq in seqs.values():
         seq.sort(key=lambda x: x[3])     
 
-    filtered_seqs, masks, max_len = normalize_seq(seqs, args.min_seq_len, args.max_seq_len)   
 
-    return filtered_seqs, masks, max_len
+    filtered_seqs, masks, max_len = normalize_seq(seqs, args.min_seq_len, args.max_seq_len)   
+    return filtered_seqs, masks, item_num
 
 def load_dataset(args):
     if args.dataset == 'All_Beauty': 
-        seqs, masks, max_len = process_AmazonDataset(args)
-    return seqs, masks
-            
+        seqs, masks, item_num = process_AmazonDataset(args)
+        global_graph = construct_global_graph(seqs, item_num)
+    return seqs, masks, global_graph, item_num

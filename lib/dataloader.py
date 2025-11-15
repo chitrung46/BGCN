@@ -29,7 +29,7 @@ def leave_one_out_strategy(data, masks):
     return train_data, val_data, test_data, train_mask, val_mask, test_mask
 
 def get_data_loaders(args):
-    data, masks = load_dataset(args)
+    data, masks, global_graph, item_num = load_dataset(args)
     train_data, val_data, test_data, train_mask, val_mask, test_mask = leave_one_out_strategy(data, masks)
     train_dataset = SRDataset(train_data, train_mask)
     val_dataset = SRDataset(val_data, val_mask)
@@ -39,7 +39,7 @@ def get_data_loaders(args):
     val_loader = DataLoader(val_dataset, batch_size=args.batch_size, shuffle=False) if val_dataset is not None else test_dataset
     test_loader = DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False) if test_dataset is not None else None
     
-    return train_loader, val_loader, test_loader
+    return train_loader, val_loader, test_loader, global_graph, item_num
 
 
 

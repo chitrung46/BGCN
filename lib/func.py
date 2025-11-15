@@ -15,7 +15,7 @@ def parse_args():
     args1 = args.parse_args()
     
     # get configuration
-    config_file = './config/{}_{}.conf'.format(args1.dataset, args1.model_name)
+    config_file = './config/{}_{}.conf'.format(args1.model_name, args1.dataset)
     config = configparser.ConfigParser()
     config.read(config_file)
 
