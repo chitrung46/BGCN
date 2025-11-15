@@ -1,15 +1,7 @@
 import torch
 import torch.nn as nn
-from util import pos_encoding, GCN, GatedGNN, LAM, BERTReviewEncoder
+from .util import pos_encoding, GCN, GatedGNN, LAM, BERTReviewEncoder
 from lib.func import construct_session_graph
-
-class LAM(nn.Module):
-    def __init__(self):
-        super(LAM, self).__init__()
-
-    def forward(self, h, review, mask):
-
-        return h
 
 class BGCN(nn.Module):
     def __init__(self, args, global_graph, item_num):

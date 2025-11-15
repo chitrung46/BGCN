@@ -66,7 +66,16 @@ class GCN(nn.Module):
             h = layer(h, adj)
             h = torch.dropout(h, self.dropout, training=self.training)
         return h
-    
+
+class LAM(nn.Module):
+    def __init__(self):
+        super(LAM, self).__init__()
+
+    def forward(self, h, review, mask):
+
+        return h
+
+   
 class GatedGNN(nn.Module):
     def __init__(self, hidden_dim, n_steps, item_num):
         super(GatedGNN, self).__init__()
