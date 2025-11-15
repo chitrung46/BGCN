@@ -44,7 +44,7 @@ class BGCN(nn.Module):
         seq_len = torch.sum(mask, dim=1)  # [B, 1]
         h = self.embedding(seq)
         h_global = self.gcn(h, self.global_graph) # [B, N, d]
-        session_graph = construct_session_graph(seq, mask) # adj_in, adj_out, adj_self [B, 3, N, N]
+        session_graph = construct_session_graph(seq, mask) # adj_in, adj_out, adj_self [B, N, 3*N]
         h_local = self.ggnn(h, session_graph)
         h_hybrid = self.LAM(h_global, h_local, mask)
         h_review = self.bre(review)

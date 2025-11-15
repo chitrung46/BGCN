@@ -68,27 +68,40 @@ class GCN(nn.Module):
         return h
     
 class GatedGNN(nn.Module):
-    def __init__(self, in_dim, out_dim):
+    def __init__(self, hidden_dim, n_steps, item_num):
         super(GatedGNN, self).__init__()
-        self.in_dim = in_dim
-        self.out_dim = out_dim
-        self.linear_z = nn.Linear(in_dim + out_dim, out_dim)
-        self.linear_r = nn.Linear(in_dim + out_dim, out_dim)
-        self.linear_h = nn.Linear(in_dim + out_dim, out_dim)
+        self.n_steps = n_steps
+        self.item_num = item_num
+        self.linear_in = nn.Linear(hidden_dim, hidden_dim, bias=True)
+        self.linear_out = nn.Linear(hidden_dim, hidden_dim, bias=True)
+        self.linear_self = nn.Linear(hidden_dim, hidden_dim, bias=True)
+        self.linear_za = nn.Linear(3*hidden_dim, hidden_dim, bias=True)
+        self.linear_zh = nn.Linear(hidden_dim, hidden_dim, bias=True)
+        self.linear_ra = nn.Linear(3*hidden_dim, hidden_dim, bias=True)
+        self.linear_rh = nn.Linear(hidden_dim, hidden_dim, bias=True)
+        self.linear_hhat_a = nn.Linear(3*hidden_dim, hidden_dim, bias=True)
+        self.linear_hhat_rh = nn.Linear(hidden_dim, hidden_dim, bias=True)
 
-    def GatedGNNCell(self, x, h):
-        a_in = 
-        a_out = 
-        combined = torch.cat([x, h], dim=1)
-        z = torch.sigmoid(self.linear_z(combined))
-        r = torch.sigmoid(self.linear_r(combined))
-        h_tilde = torch.tanh(self.linear_h(torch.cat([x, r * h], dim=1)))
-        h_new = (1 - z) * h + z * h_tilde
-        return h_new
+    def GatedGNNCell(self, hidden, adj):
+        A_in = adj[:, :, :self.item_num]
+        A_out = adj[:, :, self.item_num:2*self.item_num]
+        A_self = adj[:, :, 2*self.item_num:]
 
-    def forward(self, x, adj):
-        
-        return h
+        a_in = torch.matmul(A_in, self.linear_in(hidden))
+        a_out = torch.matmul(A_out, self.linear_out(hidden))
+        a_self = torch.matmul(A_self, self.linear_self(hidden))
+        a = torch.cat([a_in, a_out, a_self], dim=2)
+        z = torch.sigmoid(self.linear_za(a) + self.linear_zh(hidden))
+        r = torch.sigmoid(self.linear_ra(a) + self.linear_rh(hidden))
+        h_hat = torch.tanh(self.linear_hhat_a(a) + self.linear_hhat_rh(r * hidden))
+        output = (1-z) * hidden + z * h_hat
+
+        return output
+
+    def forward(self, adj, hidden):
+        for _ in range(self.n_steps):
+            hidden = self.GatedGNNCell(hidden, adj)
+        return hidden
     
 class BERTReviewEncoder(nn.Module):
     def __init__(self, model_name, max_length, out_dim, dropout, freeze_bert, pooling, normalize):

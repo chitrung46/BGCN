@@ -90,6 +90,17 @@ def construct_global_graph(seqs, item_num, k):
 
     return G
 
-def construct_session_graph(seqs, item_num):
-    S = [np.zeros((len(seq), len(seq)), dtype=int) for seq in seqs]
+def construct_session_graph(seqs, standard_seq_len, item_num):
+    S = [np.zeros((standard_seq_len, 3*standard_seq_len), dtype=int) for seq in seqs]
+
+    for idx, seq in enumerate(seqs):
+        for i in range (len(seq)):
+            item_i = seq[i]
+            for j in range(i):
+                item_j = seq[j]
+                S[idx][item_i][item_j] = 1 # in
+                S[idx][item_j][standard_seq_len+item_i] = 1 # out
+
+                if item_i == item_j:
+                    S[idx][item_i][2*standard_seq_len+item_i] = 1 # self-loop
     return S
