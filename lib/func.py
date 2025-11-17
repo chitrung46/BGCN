@@ -91,7 +91,7 @@ def construct_global_graph(seqs, item_num, k):
     # normalization
     for row in G:
         row_sum = sum(row)
-        row /= row_sum
+        row /= float(row_sum)
     print("Normalized global graph constructed")
     return G
 
