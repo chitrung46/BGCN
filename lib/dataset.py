@@ -1,7 +1,9 @@
 import torch
 import pandas as pd
 from torch.utils.data import Dataset
-from lib.func import construct_global_graph
+from .func import construct_global_graph
+import os
+import pickle
 
 class SRDataset(Dataset):
     def __init__(self, seqs, masks):
@@ -49,45 +51,62 @@ def normalize_seq(seqs, min_seq_len=0, max_seq_len=None):
     return filtered_seqs, masks, max_len
 
 def process_AmazonDataset(args):
-    df = pd.read_json(f'./data/{args.dataset}.jsonl.gz', compression='gzip', lines=True)
-    df.drop(columns=['title', 'images', 'asin'], inplace=True)
-    df.rename(columns={'parent_asin': 'item_id'}, inplace=True)
-    df = df[df['verified_purchase'] == True]
+    proc_file = os.path.join(processed_dir, f'{args.dataset}.pkl')
 
-    seqs = dict()
-    user_map = dict()
-    item_map = dict()
-    user_num = 0
-    item_num = 0
+    if not args.data_processed:    
+        df = pd.read_json(f'./data/{args.dataset}.jsonl.gz', compression='gzip', lines=True)
+        df.drop(columns=['title', 'images', 'asin'], inplace=True)
+        df.rename(columns={'parent_asin': 'item_id'}, inplace=True)
+        df = df[df['verified_purchase'] == True]
 
-    for index, row in df.iterrows():
-        user_id = row['user_id']
-        item_id = row['item_id']
-        rating = row['rating']
-        review = row['text']
-        timestamp = row['timestamp']
+        seqs = dict()
+        user_map = dict()
+        item_map = dict()
+        user_num = 0
+        item_num = 0
 
-        # mapping
-        if user_id not in user_map:
-            user_map[user_id] = user_num
-            user_num += 1
-        if item_id not in item_map:
-            item_map[item_id] = item_num
-            item_num += 1
+        for index, row in df.iterrows():
+            user_id = row['user_id']
+            item_id = row['item_id']
+            rating = row['rating']
+            review = row['text']
+            timestamp = row['timestamp']
 
-        uidx = user_map[user_id]
-        iidx = item_map[item_id]
+            # mapping
+            if user_id not in user_map:
+                user_map[user_id] = user_num
+                user_num += 1
+            if item_id not in item_map:
+                item_map[item_id] = item_num
+                item_num += 1
 
-        if uidx in seqs.keys():
-            seqs[uidx].append([iidx, rating, review, timestamp])
-        else:
-            seqs[uidx] = [[iidx, rating, review, timestamp]]
-    
-    print(f"Number of item: {item_num}")
+            uidx = user_map[user_id]
+            iidx = item_map[item_id]
 
-    for seq in seqs.values():
-        seq.sort(key=lambda x: x[3])     
+            if uidx in seqs.keys():
+                seqs[uidx].append([iidx, rating, review, timestamp])
+            else:
+                seqs[uidx] = [[iidx, rating, review, timestamp]]
+        
+        print(f"Number of item: {item_num}")
 
+        for seq in seqs.values():
+            seq.sort(key=lambda x: x[3])     
+
+        processed_dir = os.path.join('./data', 'processed')
+        os.makedirs(processed_dir, exist_ok=True)
+
+        with open(proc_file, 'wb') as fp:
+            pickle.dump({'seqs': seqs, 'user_map': user_map, 'item_map': item_map, 'item_num': item_num}, fp)
+        print(f"Saved processed data to {proc_file}")
+
+    with open(proc_file, 'rb') as fp:
+        data = pickle.load(fp)
+    seqs = data['seqs']
+    user_map = data.get('user_map', {})
+    item_map = data.get('item_map', {})
+    item_num = data.get('item_num', 0)
+    print(f"Loaded processed data from {proc_file}")
 
     filtered_seqs, masks, max_len = normalize_seq(seqs, args.min_seq_len, args.max_seq_len)   
     return filtered_seqs, masks, item_num

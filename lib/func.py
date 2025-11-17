@@ -23,7 +23,7 @@ def parse_args():
     args.add_argument('--min_seq_len', type=int, default=config['data']['min_seq_len'], help='Minimum length of a user behavior\'s sequence')
     args.add_argument('--max_seq_len', type=int, default=config['data']['max_seq_len'], help='Maximum length of a user behavior\'s sequence')
     args.add_argument('--k_transition', type=int, default=config['data']['k_transition'], help='Number of transitions for constructing global graph')
-    
+    args.add_argument('--data_processed', type=bool, default=config['data'].getboolean('data_processed'), help='Whether the dataset has been processed before')
     # model
     args.add_argument('--batch_size', type=int, default=config['model']['batch_size'], help='Batch size for training')
     args.add_argument('--hidden_dim', type=int, default=config['model']['hidden_dim'], help='Hidden dim of model layers')
@@ -74,9 +74,11 @@ def get_memory_usage(device):
     return allocated_memory, cached_memory
 
 def construct_global_graph(seqs, item_num, k):
-    G = [np.zeros(item_num, dtype=int) for _ in range(item_num)]
-    print("Startedd constructing global graph...")
+    G = np.zeros((item_num, item_num), dtype=int)
+    print("Started constructing global graph...")
+
     for seq in seqs:
+        print(seq)
         for i in range (len(seq)):
             item_i = seq[i]
             for j in range(k):
