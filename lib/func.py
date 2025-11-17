@@ -76,6 +76,8 @@ def get_memory_usage(device):
 def construct_global_graph(seqs, item_num, k):
     G = np.zeros((item_num, item_num), dtype=int)
     print("Started constructing global graph...")
+    print(G[0,0])
+    print(G[0,:])
 
     for idx, seq in enumerate(seqs.values()):
         # print(seq)
@@ -85,7 +87,7 @@ def construct_global_graph(seqs, item_num, k):
                 if i-j-1 >= 0:
                     item_j = seq[i-j-1][0]
                     G[item_j, item_i] += 1
-    print(f"Global graph size: {np.array(G).shape}")
+    print(f"Global graph size: {G.shape}")
     # normalization
     for row in G:
         row_sum = sum(row)
