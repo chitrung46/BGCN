@@ -51,6 +51,8 @@ def normalize_seq(seqs, min_seq_len=0, max_seq_len=None):
     return filtered_seqs, masks, max_len
 
 def process_AmazonDataset(args):
+    processed_dir = os.path.join('./data', 'processed')
+    os.makedirs(processed_dir, exist_ok=True)
     proc_file = os.path.join(processed_dir, f'{args.dataset}.pkl')
 
     if not args.data_processed:    
@@ -92,9 +94,6 @@ def process_AmazonDataset(args):
 
         for seq in seqs.values():
             seq.sort(key=lambda x: x[3])     
-
-        processed_dir = os.path.join('./data', 'processed')
-        os.makedirs(processed_dir, exist_ok=True)
 
         with open(proc_file, 'wb') as fp:
             pickle.dump({'seqs': seqs, 'user_map': user_map, 'item_map': item_map, 'item_num': item_num}, fp)
