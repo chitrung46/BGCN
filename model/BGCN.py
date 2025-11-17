@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from .util import pos_encoding, GCN, GatedGNN, LAM, BERTReviewEncoder
+from .util import pos_encoding, GCN, GatedGNN, LEM, BERTReviewEncoder
 from lib.func import construct_session_graph
 
 class BGCN(nn.Module):
@@ -25,7 +25,7 @@ class BGCN(nn.Module):
                                      args.bre_freeze_bert, 
                                      args.bre_pooling, 
                                      args.bre_normalize)
-        self.LAM = LAM(self.hidden_dim)
+        self.LEM = LEM(self.hidden_dim)
         self.pos_encoding = nn.Embedding(item_num, self.hidden_dim)
         self.linear1 = nn.Linear(self.hidden_dim, 3*self.hidden_dim, bias=True)
         self.linear2 = nn.Linear(self.hidden_dim, self.hidden_dim, bias=True)
@@ -33,12 +33,13 @@ class BGCN(nn.Module):
         self.linear4 = nn.Linear(self.hidden_dim, self.hidden_dim, bias=True)
 
     def forward(self, seq, review, mask):
+        print("Forward pass started")
         seq_len = torch.sum(mask, dim=1)  # [B, 1]
         h = self.embedding(seq)
         h_global = self.gcn(h, self.global_graph) # [B, N, d]
         session_graph = construct_session_graph(seq, mask) # adj_in, adj_out, adj_self [B, N, 3*N]
         h_local = self.ggnn(h, session_graph)
-        h_hybrid = self.LAM(h_global, h_local, seq_len, self.max_len)
+        h_hybrid = self.LEM(h_global, h_local, seq_len, self.max_len)
         h_review = self.bre(review)
         pos = self.pos_encoding(seq)
         z = torch.tanh(self.linear1(torch.cat([h_hybrid, h_review, pos], dim=-1))) # [B, N, d]

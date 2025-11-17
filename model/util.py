@@ -67,9 +67,9 @@ class GCN(nn.Module):
             h = torch.dropout(h, self.dropout, training=self.training)
         return h
 
-class LAM(nn.Module):
+class LEM(nn.Module):
     def __init__(self, hidden_dim):
-        super(LAM, self).__init__()
+        super(LEM, self).__init__()
         self.linear = nn.Linear(hidden_dim, hidden_dim, bias=True)
 
     def forward(self, h_global, h_local, seq_len, max_len):
@@ -141,7 +141,7 @@ class BERTReviewEncoder(nn.Module):
         else:
             mask = attn_mask.unsqueeze(-1).float()  # [B, T, 1]
             summed = (last_hidden * mask).sum(dim=1)  # [B, H]
-            counts = mask.sum(dim=1).clamp(min=1.0)  # [B, 1]
+            counts = mask.sum(dim=1).cLEMp(min=1.0)  # [B, 1]
             sent = summed / counts
         return sent
 
