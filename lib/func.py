@@ -77,7 +77,7 @@ def construct_global_graph(seqs, item_num, k):
     G = np.zeros((item_num, item_num), dtype=int)
     print("Started constructing global graph...")
 
-    for seq in seqs:
+    for idx, seq in enumerate(seqs.values()):
         print(seq)
         for i in range (len(seq)):
             item_i = seq[i]
@@ -85,7 +85,7 @@ def construct_global_graph(seqs, item_num, k):
                 if i-j-1 >= 0:
                     item_j = seq[i-j-1]
                     G[item_j][item_i] += 1
-    print(f"Global grah size: {np.array(G).shape}")
+    print(f"Global graph size: {np.array(G).shape}")
     # normalization
     for row in G:
         row_sum = sum(row)

@@ -108,6 +108,7 @@ def process_AmazonDataset(args):
     print(f"Loaded processed data from {proc_file}")
 
     filtered_seqs, masks, max_len = normalize_seq(seqs, args.min_seq_len, args.max_seq_len)   
+    print(f"filtered seqs 1: {list(filtered_seqs.items())[0]}")
     return filtered_seqs, masks, item_num
 
 def load_dataset(args):
