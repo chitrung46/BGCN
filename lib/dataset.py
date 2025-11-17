@@ -37,8 +37,8 @@ def normalize_seq(seqs, min_seq_len=0, max_seq_len=None):
     for idx, seq in enumerate(seqs.values()):
         if len(seq) >= min_seq_len:
             l = len(seq)
-            filtered_seqs[idx] = [padding]*(max_len-l) + seq[-max_len:] if (max_len > l) else seq[-max_len:]
-            masks[idx] = [0]*(max_len-l) + [1]*max_len if (max_len > l) else [1]*max_len
+            filtered_seqs[idx] = [padding]*(max_len-l) + seq[-l:] if (max_len > l) else seq[-max_len:]
+            masks[idx] = [0]*(max_len-l) + [1]*l if (max_len > l) else [1]*max_len
     
     print(f"Average length of sequence: {sum(seq_len)/len(seq_len)}")
     print(f"Maximum length of sequence: {max_len}")
