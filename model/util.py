@@ -68,14 +68,16 @@ class GCN(nn.Module):
         return h
 
 class LAM(nn.Module):
-    def __init__(self):
+    def __init__(self, hidden_dim):
         super(LAM, self).__init__()
+        self.linear = nn.Linear(hidden_dim, hidden_dim, bias=True)
 
-    def forward(self, h, review, mask):
+    def forward(self, h_global, h_local, seq_len, max_len):
+        alpha = torch.sigmoid(self.linear(seq_len * max_len)) # [B]
+        alpha = alpha.unsqueeze(-1).unsqueeze(-1)  # [B, 1, 1]
+        h_hybrid = (1 - alpha) * h_global + alpha * h_local
+        return h_hybrid
 
-        return h
-
-   
 class GatedGNN(nn.Module):
     def __init__(self, hidden_dim, n_steps, item_num):
         super(GatedGNN, self).__init__()

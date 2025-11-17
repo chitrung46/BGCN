@@ -10,7 +10,7 @@ class BGCN(nn.Module):
         self.item_num = item_num
         self.in_dim = args.in_dim
         self.out_dim = args.out_dim
-        max_len = args.max_seq_len
+        self.max_len = args.max_seq_len
         # self.embedding = nn.Embedding(max_len, self.hidden_dim)
         # self.pos = pos_encoding(max_len, self.hidden_dim)
         self.global_graph = global_graph # [N, N]
@@ -19,13 +19,13 @@ class BGCN(nn.Module):
         self.gcn = GCN(self.in_dim, self.out_dim, self.hidden_dim, num_layers=args.gcn_layers, dropout=args.dropout)
         self.ggnn = GatedGNN(self.in_dim, self.out_dim, self.hidden_dim, num_layers=2, dropout=args.dropout)
         self.bre = BERTReviewEncoder(args.bre_model_name, 
-                                     args.bre_max_length, 
+                                     args.bre_max_len, 
                                      args.bre_out_dim, 
                                      args.bre_dropout,
                                      args.bre_freeze_bert, 
                                      args.bre_pooling, 
                                      args.bre_normalize)
-        self.LAM = LAM()
+        self.LAM = LAM(self.hidden_dim)
         self.pos_encoding = nn.Embedding(item_num, self.hidden_dim)
         self.linear1 = nn.Linear(self.hidden_dim, 3*self.hidden_dim, bias=True)
         self.linear2 = nn.Linear(self.hidden_dim, self.hidden_dim, bias=True)
@@ -38,7 +38,7 @@ class BGCN(nn.Module):
         h_global = self.gcn(h, self.global_graph) # [B, N, d]
         session_graph = construct_session_graph(seq, mask) # adj_in, adj_out, adj_self [B, N, 3*N]
         h_local = self.ggnn(h, session_graph)
-        h_hybrid = self.LAM(h_global, h_local, mask)
+        h_hybrid = self.LAM(h_global, h_local, seq_len, self.max_len)
         h_review = self.bre(review)
         pos = self.pos_encoding(seq)
         z = torch.tanh(self.linear1(torch.cat([h_hybrid, h_review, pos], dim=-1))) # [B, N, d]

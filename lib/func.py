@@ -32,7 +32,7 @@ def parse_args():
     
     # bertreviewencoder
     args.add_argument('--bre_model_name', type=str, default=config['bre']['model_name'], help='Pretrained BERT model name')
-    args.add_argument('--bre_max_length', type=int, default=config['bre']['max_length'], help='Maximum length of review text')
+    args.add_argument('--bre_max_len', type=int, default=config['bre']['max_len'], help='Maximum length of review text')
     args.add_argument('--bre_out_dim', type=int, default=config['bre']['out_dim'],  help='Output dimension of BERT review encoder')
     args.add_argument('--bre_dropout', type=float, default=config['bre']['dropout'], help='Dropout rate in BERT review encoder')
     args.add_argument('--bre_freeze_bert', type=bool, default=config['bre'].getboolean('freeze_bert'), help='Whether to freeze BERT parameters during training')
