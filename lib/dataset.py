@@ -95,5 +95,7 @@ def process_AmazonDataset(args):
 def load_dataset(args):
     if args.dataset == 'All_Beauty': 
         seqs, masks, item_num = process_AmazonDataset(args)
+        print("Constructing global graph...")
         global_graph = construct_global_graph(seqs, item_num, args.k_transition)
+        print("Global graph constructed.")
     return seqs, masks, global_graph, item_num
